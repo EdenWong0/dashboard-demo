@@ -1,60 +1,31 @@
-import React, {useEffect, useState} from 'react';
-import { getUsers } from '../services/api';
-import StatCard from '../components/StatCard';
-import UsersTable from '../components/UsersTable';
+import { useState, useEffect } from "react";
+import { getUsers } from './../services/api';
+import UsersTable from './../components/UsersTable';
+import StatCard from './../components/StatCard';
 
 function Dashboard() {
-
-    const [users, setUsers] = useState([]);
+    const [user, setUser] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [search, setSearch] = useState("");
-    const [sortByAsc, setSortByAsc] = useState(true);
 
     useEffect(() => {
-        loadUsers();
-    }, [])
+        getUsers().then(data => {
+            setUser(data);
+            setLoading(false)
+        })
+    }, []);
 
-    const loadUsers = async () => {
-        try {
-            const data = await getUsers();
-            setUsers(data);
-        } catch(error) {
-            setError("Failed to load users");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const filteredUsers = users.filter(user => 
-        user.name.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase)
-    );
-
-    const sortedUsers = [...filteredUsers].sort((a,b) => 
-        sortByAsc 
-            ? a.name.localeCompare(b.name)
-            : b.name.localeCompare(a.name)
-    );
-
-    if (loading) return <p>loading...</p>;
-    if (error) return <p>{error}</p>;
+    if(loading) return <p>Loading...</p>
 
   return (
     <div>
-        <h1 className="dashboard-title">Dashboard</h1>
-
+        <h1>AMMC Dashboard</h1>
+        
         <div className="cards">
-            <StatCard title="Total Users" value={users.length}/>
-            <StatCard title="Filtered Users" value={sortedUsers.length} />
+            <StatCard title="Total User" value={user.length}/>
+            <StatCard title="Active User" value={20}/>       
         </div>
 
-        <div className="controls">
-            <input text="input" placeholder="Seach Users...." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <button onClick={() => setSortByAsc(!sortByAsc)} />
-        </div>
-
-        <UsersTable users={sortedUsers} />
+        <UsersTable users={user}/>    
     </div>
   )
 }
